@@ -9,8 +9,6 @@ import com.likelion.likelionassignment07.post.api.dto.response.PostListResponseD
 import com.likelion.likelionassignment07.post.application.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,13 +43,12 @@ public class PostController {
         return ApiResTemplate.successResponse(SuccessCode.POST_UPDATE_SUCCESS, postInfoResponseDto);
     }
 
-
     // 게시물 id를 기준으로 사용자가 작성한 게시물 삭제
     @DeleteMapping("/{postId}")
-    public ResponseEntity<String> postDelete(
+    public ApiResTemplate<String> postDelete(
             @PathVariable("postId") Long postId) {
         postService.postDelete(postId);
-        return new ResponseEntity<>("게시물 삭제", HttpStatus.OK);
+        return ApiResTemplate.successResponse(SuccessCode.POST_DELETE_SUCCESS, null);
     }
 
     // 게시물의 이미지 삭제 API

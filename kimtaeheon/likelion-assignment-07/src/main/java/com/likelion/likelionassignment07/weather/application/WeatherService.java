@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -111,22 +112,23 @@ public class WeatherService {
         }
     }
 
-    // 한국 주요 도시들의 날씨 정보 조회
     public List<WeatherResponseDto> getKoreaCitiesWeather() {
         String[] cities = {"Seoul", "Busan", "Incheon", "Daegu", "Daejeon", "Gwangju"};
 
         return List.of(cities).stream()
-                .map(city -> {
-                    try {
-                        return getCurrentWeather(city);
-                    } catch (BusinessException e) {
-                        log.warn("도시 {} 날씨 조회 실패: {}", city, e.getMessage());
-                        // 실패한 도시는 제외하고 계속 진행
-                        return null;
-                    }
-                })
-                .filter(weather -> weather != null)
+                .map(this::tryGetWeather)         // Optional<WeatherResponseDto>
+                .filter(Optional::isPresent)      // 값이 있는 경우만 필터링
+                .map(Optional::get)               // Optional에서 실제 값 꺼내기
                 .toList();
+    }
+
+    private Optional<WeatherResponseDto> tryGetWeather(String city) {
+        try {
+            return Optional.of(getCurrentWeather(city));
+        } catch (BusinessException e) {
+            log.warn("도시 {} 날씨 조회 실패: {}", city, e.getMessage());
+            return Optional.empty();
+        }
     }
 
     /**
